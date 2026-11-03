@@ -9,11 +9,6 @@ export interface Bounds {
   h: number;
 }
 
-/** Enterprise scenery is part of the overview, including the quay north of the building. */
-export function officeSceneRect(building: Bounds, enterprise = false): Bounds {
-  return enterprise ? { x: building.x - 150, y: building.y - 190, w: building.w + 300, h: building.h + 410 } : building;
-}
-
 /** Margens (px CSS) da visão geral: pílulas flutuantes acima das salas, meio-fio abaixo, laterais. */
 export const OVERVIEW_MARGIN = { top: 34, bottom: 10, side: 16 } as const;
 

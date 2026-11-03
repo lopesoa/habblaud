@@ -5,7 +5,7 @@ import { TILE, type ArtModule } from '../art/api';
 import type { OfficeStore } from '../net/store';
 import { DEFAULT_WORLD_OPTIONS, seasonalThemeFor, type Selection, type SocialEvent, type SoundCue, type WorldApi, type WorldOptions, type WorldPlayback } from './api';
 import { loadWorldAssets, type WorldAssets } from './assets';
-import { Camera, overviewFrame, officeSceneRect } from './camera';
+import { Camera, overviewFrame } from './camera';
 import { createDebug, type WorldDebug } from './debug';
 import { BUILDING_H, COL_W } from './constants';
 import { RECEPTION_ID } from './layout/core';
@@ -101,15 +101,16 @@ export function createWorld(canvas: HTMLCanvasElement, store: OfficeStore, o: Cr
   const buildingRect = () => ({ x: 0, y: 0, w: sim.building.cols * COL_W * TILE, h: BUILDING_H * TILE });
 
   const updateBounds = () => {
-    const b = officeSceneRect(buildingRect(), !!options.companyTheme);
+    const b = buildingRect();
     camera.bounds = { x: b.x - 7 * TILE, y: b.y - 6 * TILE, w: b.w + 14 * TILE, h: b.h + 18 * TILE };
-    const fit = options.companyTheme ? overviewFrame(b, camera.viewW, camera.viewH, camera.insets).zoom : camera.fitZoom(b, 16);
-    camera.minZoom = Math.min(1, Math.max(options.companyTheme ? 0.1 : 0.25, fit));
+    const fit = camera.fitZoom(b, 16);
+    camera.minZoom = Math.min(1, Math.max(0.25, fit));
     camera.clamp();
   };
 
   const overviewTarget = () => {
-    const frame = officeSceneRect(buildingRect(), !!options.companyTheme);
+    const building = buildingRect();
+    const frame = options.companyTheme ? { x: building.x - 150, y: building.y - 190, w: building.w + 300, h: building.h + 410 } : building;
     const f = overviewFrame(frame, camera.viewW, camera.viewH, camera.insets);
     const fit = Math.max(camera.minZoom, f.zoom);
     const snapped = camera.snapZoom(fit, 'down');
@@ -416,7 +417,7 @@ export function createWorld(canvas: HTMLCanvasElement, store: OfficeStore, o: Cr
     setOptions: (o) => {
       const companyChanged = 'companyTheme' in o && o.companyTheme !== options.companyTheme;
       options = { ...options, ...o };
-      if (companyChanged) { updateBounds(); if (framed) { userMoved = false; overview(true); } }
+      if (companyChanged && framed) { userMoved = false; overview(true); }
       if (o.followSelected !== undefined) camera.follow = o.followSelected && selection?.type === 'agent' ? selection.id : null;
     },
     setViewInsets: (ins) => {
