@@ -53,6 +53,7 @@ const HISTORY_LIMIT = 200;
 const FEED_LIMIT = 200;
 
 export interface OfficeDeps {
+  projectSnapshot?: (snapshot: OfficeSnapshot) => OfficeSnapshot;
   names: NameStore;
   /** Nome escolhido pelo usuário para a sala da pasta (model/room-aliases.ts), se houver. */
   roomAlias?: (path: string) => string | undefined;
@@ -986,7 +987,7 @@ export class Office {
     const sessions = new Map<string, number>();
     for (const a of real) if (a.kind === 'main' && a.status !== 'offline') sessions.set(a.account, (sessions.get(a.account) ?? 0) + 1);
     const ptys = this.deps.ptys?.();
-    return {
+    const snapshot: OfficeSnapshot = {
       rev: this.rev,
       serverTime: now,
       rooms,
@@ -1006,6 +1007,7 @@ export class Office {
         ...(this.deps.world ? { world: this.deps.world() } : {}),
       },
     };
+    return this.deps.projectSnapshot?.(snapshot) ?? snapshot;
   }
 
   /**

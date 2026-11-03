@@ -764,3 +764,21 @@ describe('espera de shell', () => {
     expect(ana.pose).toBe('wait');
   });
 });
+
+describe('seleção privada do escritório', () => {
+  it('remove imediatamente sala e personagem ao ocultar projeto', () => {
+    const sim = newSim();
+    const first = snap([room('/a', 0), room('/b', 1)], [agent('ana', '/a', 'working'), agent('bia', '/b', 'working')]);
+    first.meta.dashboard = true;
+    sim.applySnapshot(first, T0);
+    expect(sim.rooms.has('/a')).toBe(true);
+    expect(sim.chars.has('ana')).toBe(true);
+    const next = snap([room('/b', 1)], [agent('bia', '/b', 'working')], 2);
+    next.meta.dashboard = true;
+    sim.applySnapshot(next, T0 + 1);
+    expect(sim.rooms.has('/a')).toBe(false);
+    expect(sim.chars.has('ana')).toBe(false);
+    expect(sim.rooms.has('/b')).toBe(true);
+    expect(sim.chars.has('bia')).toBe(true);
+  });
+});

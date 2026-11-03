@@ -1,0 +1,21 @@
+.dash-open {font:inherit; padding:7px 12px; border:1px solid #4d7d77; background:#183b35; color:#d6fff0; border-radius:8px; white-space:nowrap}
+.dash-dialog {width:min(1080px,94vw); max-height:90vh; padding:0; border:1px solid #526568; border-radius:16px; background:#142326; color:#e9f1ed; box-shadow:0 28px 100px #000b; font-family:system-ui,sans-serif; font-size:14px}
+.dash-dialog::backdrop {background:#071314d9}
+.dash-head {display:flex; align-items:center; justify-content:space-between; gap:20px; padding:20px 25px; background:linear-gradient(120deg,#183e3b,#1b2c36)}
+.dash-head h2 {margin:0; font-size:24px}.dash-head p {margin:5px 0 0; color:#afc4bf}
+.dash-tabs {display:flex; gap:8px; padding:12px 24px; border-bottom:1px solid #37504e; flex-wrap:wrap}
+.dash-tabs [aria-pressed=true] {background:#356d61; color:#fff; border-color:#72cbb3}
+.dash-content {padding:20px 24px; min-height:260px; max-height:58vh; overflow:auto}
+.dash-footer {display:flex; align-items:center; justify-content:space-between; padding:14px 24px; border-top:1px solid #37504e; gap:12px; background:#182d2c}
+.dash-message {margin:0; color:#a5e0cb}.dash-hint {color:#a9c1ba; line-height:1.55; margin:0 0 16px}
+.dash-card {padding:16px; margin:12px 0; border:1px solid #3e5854; border-radius:11px; background:#1b302f}.dash-card code {display:block; color:#a5c4bb; word-break:break-all; margin:8px 0 14px;font-size:12px}
+.dash-row {display:flex; gap:12px; align-items:center; justify-content:space-between;flex-wrap:wrap}
+.dash-grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px}
+.dash-field {display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}.dash-field>span {font-size:12px;color:#c0d6cd}
+.dash-input {box-sizing:border-box; background:#102422;color:#eaf5ee;border:1px solid #506b60;border-radius:6px;padding:10px; width:100%;font:inherit}
+.dash-input[type=checkbox] {width:18px;height:18px;accent-color:#7dd3ab;flex:none}
+.dash-input[type=color] {padding:3px;height:40px}
+.dash-add {display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:16px}.dash-visible {display:flex;align-items:center;gap:10px}
+.dash-roster {display:flex;gap:12px;flex-wrap:wrap}.dash-roster label {display:flex;align-items:center;gap:6px;padding:7px;background:#122722;border-radius:7px}
+.dash-candidates {margin:14px 0;color:#c2dcd0}.dash-candidates .ui-btn {display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;margin:6px 0;text-align:left}
+.dash-empty {padding:34px;text-align:center;color:#a8c2b7}

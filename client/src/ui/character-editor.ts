@@ -72,6 +72,7 @@ export class CharacterEditor {
 
   /** A cada render da gaveta: o lápis só aparece quando dá para editar; o editor fecha se o agente saiu. */
   render(a: AgentInfo, live: boolean): void {
+    if (this.ctx.store.snapshot?.meta.dashboard) { this.button.hidden = true; this.close(); return; }
     const store = this.ctx.store;
     const allowed = canEditCharacter(a, {
       live,

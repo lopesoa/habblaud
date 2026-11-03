@@ -1,6 +1,7 @@
 // Simulação do escritório: concilia snapshots do servidor com os personagens e salas do mundo,
 // planeja comportamentos e executa as filas de passos a cada frame.
 import { partsKey } from '../../../../shared/appearance';
+import { industryRoomTheme } from '../render/industry';
 import type { AgentInfo, OfficeSnapshot, Provider, RoomInfo } from '../../../../shared/types';
 import type { ArtModule, Dir, RoomTheme } from '../../art/api';
 import type { WorldOptions } from '../api';
@@ -173,6 +174,16 @@ export class Sim {
 
     // ---- salas
     let layoutDirty = false;
+    if (snap.meta.dashboard) {
+      const allowedRooms = new Set(snap.rooms.map(r => r.id));
+      const allowedAgents = new Set(snap.agents.map(a => a.id));
+      let removed = false;
+      for (const [id, ch] of this.chars) if (!allowedAgents.has(id) || !allowedRooms.has(ch.roomId)) {
+        this.spots.releaseAll(id); this.chars.delete(id); removed = true;
+      }
+      for (const id of this.rooms.keys()) if (!allowedRooms.has(id)) { this.rooms.delete(id); layoutDirty = true; }
+      if (removed) this.social.reset(now);
+    }
     const listed = new Set<string>();
     // na ordem de chegada (slot do servidor): na carga inicial as salas ocupam as vagas 0, 1, 2... nessa ordem
     for (const r of [...snap.rooms].sort((a, b) => a.slot - b.slot)) {
@@ -184,7 +195,12 @@ export class Sim {
         layoutDirty = true;
         continue;
       }
-      if (rs.info.name !== r.name || rs.info.seed !== r.seed) rs.version++;
+      if (rs.info.sector !== r.sector || rs.info.accent !== r.accent) {
+        rs.theme = industryRoomTheme(r, this.art.roomTheme(r.seed) ?? FALLBACK_THEME);
+        rs.layout = layoutProjectRoom({ id: r.id, slot: rs.slot, seed: r.seed }, rs.theme);
+        rs.version++; layoutDirty = true;
+      }
+      if (rs.info.name !== r.name || rs.info.seed !== r.seed || rs.info.company !== r.company) rs.version++;
       rs.info = r;
       if (!rs.listed) {
         rs.listed = true;
@@ -257,6 +273,7 @@ export class Sim {
     } catch {
       theme = FALLBACK_THEME;
     }
+    theme = industryRoomTheme(r, theme);
     // a primeira vaga livre do prédio (o slot do servidor só dá a ordem de chegada)
     const slot = this.freeSlot();
     const layout = layoutProjectRoom({ id: r.id, slot, seed: r.seed }, theme);

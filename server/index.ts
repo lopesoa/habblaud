@@ -3,6 +3,8 @@
 //   npm run dev    -> tsx server/index.ts --dev (Vite em middleware mode, HMR no mesmo servidor)
 //   npm start      -> node dist/server/index.js (serve dist/client)
 import http from 'node:http';
+import { DashboardStore } from './dashboard';
+import type { SessionLookup } from './sources/source';
 import { join } from 'node:path';
 import { codexDirsRefused, isDefaultDir } from './accounts/detect';
 import { AccountsService } from './accounts/service';
@@ -113,7 +115,9 @@ const accounts = new AccountsService({
   usageDir: config.usageDir,
   onChange: () => late.office?.markDirty(),
 });
+const dashboard = new DashboardStore(join(config.dataDir, 'dashboard.json'), () => late.office?.markDirty());
 const office = new Office({
+  projectSnapshot: snap => dashboard.projectSnapshot(snap),
   names,
   roomAlias: (path) => roomAliases.get(path),
   version: config.version,
@@ -145,6 +149,8 @@ late.office = office;
 late.agents = agents;
 // Página que pode responder pelo escritório: Host local na porta local; na remota, só com permissions liberado.
 const hub = new Hub(office, {
+  filterFeed: feed => dashboard.filterFeed(feed),
+  noticeAllowed: notice => dashboard.noticeAllowed(notice),
   canAnswer: (req) => (isRemoteRequest(req) ? !!config.remote?.allow.has('permissions') : isLoopbackHost(req.headers.host)),
 });
 // "Meu dia": amostra o escritório a cada segundo e persiste em <dataDir>/stats/ (ver history/daystats.ts).
@@ -338,7 +344,23 @@ const ticker = setInterval(() => {
   }
 }, 250);
 
+const dashboardHistory: SessionLookup | undefined = history ? {
+  list: async () => { dashboardRecent = await history.list(); return dashboardRecent.filter(s => dashboard.allowed(s.project ?? '', s.account)); },
+  resolve: (account, sessionId) => {
+    const row = dashboardRecent.find(s => s.account === account && s.sessionId === sessionId);
+    return row && dashboard.allowed(row.project ?? '', account) ? history.resolve(account, sessionId) : { status: 404, error: tr('Sessão não disponível neste escritório.') };
+  },
+} : undefined;
+let dashboardRecent: Awaited<ReturnType<SessionLookup['list']>> = [];
 const api = createApiHandler({
+  dashboard,
+  dashboardCandidates: async () => {
+    dashboardRecent = history ? await history.list() : [];
+    const entries = new Map<string, { path: string; name: string }>();
+    for (const s of dashboardRecent) if (s.project) entries.set(s.project, { path: s.project, name: s.project.split(/[\\/]/).pop() || s.project });
+    for (const a of office.list()) entries.set(a.roomId, { path: a.roomId, name: a.roomId.split(/[\\/]/).pop() || a.roomId });
+    return [...entries.values()];
+  },
   renameRoom: (id, name) => {
     const path = office.roomPath(id);
     if (!path) return undefined;
@@ -354,7 +376,7 @@ const api = createApiHandler({
   inDocker: config.inDocker,
   terminal: config.terminal,
   terminals,
-  sessions: history,
+  sessions: dashboardHistory,
   timeline: createTimelineHandler({ dir: timelineDir, recording: !!timeline }),
   permissions: permissions ? createPermissionRoutes(permissions) : undefined,
   messages: messages ? createMessageRoutes(messages) : undefined,
@@ -369,7 +391,7 @@ const api = createApiHandler({
     const last = new Map<string, number>();
     for (const a of snap.agents) last.set(a.roomId, Math.max(last.get(a.roomId) ?? 0, a.lastEventAt ?? 0));
     const rooms = snap.rooms.filter((r) => !isDemoId(r.id)).map((r) => ({ path: r.path, lastAt: last.get(r.id) ?? 0 }));
-    return recentFolders(history ? await history.list().catch(() => []) : [], rooms);
+    return recentFolders(history ? (await history.list().catch(() => [])).filter(s => dashboard.allowed(s.project ?? '', s.account)) : [], rooms);
   },
   codexLive,
   stats,

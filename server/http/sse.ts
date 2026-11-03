@@ -2,7 +2,7 @@
 // Eventos nomeados: snapshot | feed | notice (o `data` é o JSON do protocolo em shared/types.ts).
 // Snapshots saem com throttle (~200 ms); feed e avisos vão em lote logo depois do snapshot.
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import type { OfficeSnapshot } from '../../shared/types';
+import type { FeedItem, Notice, OfficeSnapshot } from '../../shared/types';
 import type { Office } from '../model/office';
 import { isLoopbackHost } from './guard';
 
@@ -18,6 +18,8 @@ export class Hub {
   private lastFlush = 0;
   private unsubscribe: (() => void) | null = null;
   private snapshotCbs = new Set<(snap: OfficeSnapshot) => void>();
+  private readonly filterFeed: (feed: FeedItem[]) => FeedItem[];
+  private readonly noticeAllowed: (notice: Notice) => boolean;
   private readonly throttleMs: number;
   private readonly pingMs: number;
   /** Quem pode responder pelo escritório; padrão: Host local. A porta remota (http/remote.ts) troca a regra. */
@@ -25,8 +27,10 @@ export class Hub {
 
   constructor(
     private readonly office: Office,
-    opts: { throttleMs?: number; pingMs?: number; canAnswer?: (req: IncomingMessage) => boolean } = {},
+    opts: { filterFeed?: (feed: FeedItem[]) => FeedItem[]; noticeAllowed?: (notice: Notice) => boolean; throttleMs?: number; pingMs?: number; canAnswer?: (req: IncomingMessage) => boolean } = {},
   ) {
+    this.filterFeed = opts.filterFeed ?? (feed => feed);
+    this.noticeAllowed = opts.noticeAllowed ?? (() => true);
     this.throttleMs = opts.throttleMs ?? 200;
     this.pingMs = opts.pingMs ?? 15_000;
     this.canAnswer = opts.canAnswer ?? ((req) => isLoopbackHost(req.headers.host));
@@ -79,7 +83,7 @@ export class Hub {
     const snapshot = this.current();
     res.write('retry: 2000\n\n');
     res.write(frame('snapshot', snapshot));
-    res.write(frame('feed', this.office.recentFeed(50)));
+    res.write(frame('feed', this.filterFeed(this.office.recentFeed(50))));
     this.clients.add(res);
     if (this.canAnswer(req)) this.local.add(res);
     const drop = () => this.clients.delete(res);
@@ -104,8 +108,8 @@ export class Hub {
         }
       }
     }
-    if (r.feed.length) this.writeAll(frame('feed', r.feed));
-    for (const n of r.notices) this.writeAll(frame('notice', n));
+    if (r.feed.length) this.writeAll(frame('feed', this.filterFeed(r.feed)));
+    for (const n of r.notices.filter(this.noticeAllowed)) this.writeAll(frame('notice', n));
     return r.snapshot;
   }
 

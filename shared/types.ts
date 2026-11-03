@@ -189,6 +189,10 @@ export interface AgentInfo {
 }
 
 export interface RoomInfo {
+  company?: string;
+  sector?: import('./dashboard').Sector;
+  accent?: string;
+  pinned?: boolean;
   /** Chave estável: cwd normalizado do projeto. */
   id: string;
   /** Nome exibido (basename do cwd, desambiguado se repetido). */
@@ -339,6 +343,7 @@ export interface OfficeSnapshot {
   /** Contas do Claude detectadas (com uso de 5h/semanal quando disponível). */
   accounts: AccountInfo[];
   meta: {
+    dashboard?: boolean;
     demo: boolean;
     sources: SourceInfo[];
     startedAt: number;

@@ -1,4 +1,5 @@
 // Rotas da API (/api/*). Respostas JSON; rotas desconhecidas -> 404 JSON.
+import type { DashboardStore } from '../dashboard';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { NAME_MAX, parseAppearanceParts, parseCharacterName, parseSeed } from '../../shared/appearance';
 import type { AccessInfo, AgentInfo, ModSummary, OfficeSnapshot, SourceInfo, UpdateStatus } from '../../shared/types';
@@ -24,6 +25,8 @@ import type { FileFetcher } from '../deliveries/fetcher';
 import { HOST_WAIT_MS } from '../host-wait';
 
 export interface ApiDeps {
+  dashboard?: DashboardStore;
+  dashboardCandidates?: () => Promise<Array<{ path: string; name: string }>>;
   office: Office;
   hub: Hub;
   accounts: AccountsService;
@@ -338,6 +341,29 @@ export function createApiHandler(deps: ApiDeps): (req: IncomingMessage, res: Ser
       sendJson(res, 403, { error: tr('rota só do próprio computador (hooks, plugins e o auxiliar do host)') });
       return true;
     }
+    if (path === '/api/dashboard' || path === '/api/dashboard/projects') {
+      if (!deps.dashboard || isRemote(req) || !isLoopbackHost(req.headers.host) || !deps.terminal) {
+        req.resume(); sendJson(res, 403, { error: tr('Configuração disponível apenas no próprio computador.') });
+      } else if (method === 'GET') {
+        if (path.endsWith('/projects')) (deps.dashboardCandidates?.() ?? Promise.resolve([])).then(projects => sendJson(res, 200, { projects }), err => fail(res, err));
+        else sendJson(res, 200, deps.dashboard.get());
+      } else if (method === 'PUT' && path === '/api/dashboard') {
+        readJson(req).then(body => {
+          try { deps.dashboard!.save(body); } catch (error) { throw new HttpError(400, (error as Error).message); }
+          terminals?.stop(); hub.flush(); sendJson(res, 200, { ok: true });
+        }).catch(err => fail(res, err));
+      } else methodNotAllowed(res, 'GET, PUT');
+      return true;
+    }
+    if (deps.dashboard && /^\/api\/(timeline|stats|deliveries)(\/|$)/.test(path)) {
+      // Old recordings can contain now-hidden projects. Fail closed instead of exposing old data.
+      req.resume(); sendJson(res, 403, { error: tr('Histórico agregado indisponível no escritório com projetos selecionados.') }); return true;
+    }
+    if (deps.dashboard && path.startsWith('/api/agents/')) {
+      let id: string;
+      try { id = decodeURIComponent(path.split('/')[3]); } catch { sendJson(res, 400, { error: tr('id inválido') }); return true; }
+      if (!hub.current().agents.some(a => a.id === id)) { req.resume(); sendJson(res, 404, { error: tr('agente não encontrado') }); return true; }
+    }
     if (path === '/api/world' || path.startsWith('/api/world/')) {
       // A conta do Habblaud World age em seu nome: só o próprio computador, como o terminal. O Host local sozinho não
       // basta (o Tailscale chega pelo loopback e o Host se imita): a porta remota nunca passa, nem com login.
@@ -377,8 +403,8 @@ export function createApiHandler(deps: ApiDeps): (req: IncomingMessage, res: Ser
           messages: !!deps.messages && (!remote || trusted(req, 'messages')),
           codexEvents: !!deps.codexLive,
           updates: updatesSummary(deps.updates?.status()),
-          sources: deps.sources(),
-          accounts: accounts.allEntries().map((a) =>
+          sources: deps.dashboard ? hub.current().meta.sources : deps.sources(),
+          accounts: accounts.allEntries().filter(a => !deps.dashboard || deps.dashboard.get().accounts.includes(a.id)).map((a) =>
             a.provider === 'claude'
               ? { id: a.id, usageStatus: accounts.usageView(a.id).status }
               : { id: a.id, provider: a.provider, usageStatus: accounts.usageView(a.id).status },
@@ -658,7 +684,7 @@ export function createApiHandler(deps: ApiDeps): (req: IncomingMessage, res: Ser
         return true;
       }
       const detail = office.detail(id);
-      if (detail) sendJson(res, 200, detail);
+      if (detail) sendJson(res, 200, { ...detail, agent: hub.current().agents.find(a => a.id === id) ?? detail.agent });
       else sendJson(res, 404, { error: tr('agente não encontrado') });
       return true;
     }

@@ -6,9 +6,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/marmottajr/habblaud.git"
+    "url": "git+https://github.com/lopesoa/habblaud.git"
   },
-  "homepage": "https://github.com/marmottajr/habblaud#readme",
+  "homepage": "https://github.com/lopesoa/habblaud",
   "type": "module",
   "engines": {
     "node": ">=22.12"
@@ -35,12 +35,12 @@
     "hooks:install": "tsx scripts/hooks-install.ts install",
     "hooks:uninstall": "tsx scripts/hooks-install.ts uninstall",
     "hooks:status": "tsx scripts/hooks-install.ts status",
-    "mod:install": "tsx scripts/mod-install.ts install",
-    "mod:uninstall": "tsx scripts/mod-install.ts uninstall",
-    "mod:status": "tsx scripts/mod-install.ts status",
-    "codex:install": "tsx scripts/codex-install.ts install",
-    "codex:uninstall": "tsx scripts/codex-install.ts uninstall",
-    "codex:status": "tsx scripts/codex-install.ts status",
+    "mod:install": "bash scripts/windows-integrations.sh mod install",
+    "mod:uninstall": "bash scripts/windows-integrations.sh mod uninstall",
+    "mod:status": "bash scripts/windows-integrations.sh mod status",
+    "codex:install": "bash scripts/windows-integrations.sh codex install",
+    "codex:uninstall": "bash scripts/windows-integrations.sh codex uninstall",
+    "codex:status": "bash scripts/windows-integrations.sh codex status",
     "codex:bridge": "tsx scripts/codex-bridge.ts",
     "remote:setup": "tsx scripts/remote-setup.ts",
     "remote:mdns": "tsx scripts/remote-mdns.ts",

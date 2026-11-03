@@ -1,6 +1,7 @@
 // Desenho do mundo por frame: camada externa -> pisos -> paredes/itens de parede -> entidades
 // ordenadas por profundidade -> luz/escuridão -> ícones. A passada em espaço de tela (texto
 // nítido) fica em overlay.ts.
+import { drawIndustryRoom } from './industry';
 import { TILE, type ArtModule, type CharacterFrameRequest, type IconName, type ScreenMode, type Sprite } from '../../art/api';
 import type { SeasonalTheme, WorldOptions } from '../api';
 import type { WorldAssets } from '../assets';
@@ -380,6 +381,7 @@ export class Renderer {
       if (!visible(p.x, p.y - WALL_MARGIN, p.w, p.h + WALL_MARGIN)) continue;
       const anim = vis.room ? buildAnim(vis.room.phase, vis.room.progress(now)) : NO_ANIM;
       this.drawFloor(vis, anim);
+      if (vis.room && vis.room.phase === 'ready') drawIndustryRoom(ctx, vis.room.info, vis.px);
     }
     for (const vis of this.areas.values()) {
       const p = vis.px;

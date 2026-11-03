@@ -8,6 +8,8 @@ import '@fontsource/pixelify-sans/500.css';
 import '@fontsource/pixelify-sans/600.css';
 import '@fontsource/pixelify-sans/700.css';
 import './styles.css';
+import './dashboard.css';
+import { DashboardPanel } from './dashboard';
 
 import type { OfficeStore } from '../net/store';
 import type { Selection, WorldApi } from '../world/api';
@@ -174,6 +176,8 @@ export function createUI(root: HTMLElement, store: OfficeStore, world: WorldApi,
   const notifier = new Notifier(ctx, sound.board);
   topbar = new TopBar(ctx);
   sidebar = new Sidebar(ctx);
+  const dashboard = new DashboardPanel(ctx);
+  topbar.panelGroup.prepend(dashboard.button);
   // Terminal interativo (Claude Code de verdade, dentro do navegador): abrir, assumir e encerrar sessões.
   const pty = new PtyPanel(ctx);
   const terminal = new TerminalPanel(ctx, pty);

@@ -10,6 +10,15 @@ do meio (0.**3**.0).
 
 ## [Não lançado]
 
+### Adicionado no fork
+
+- Gestão local de projetos escolhidos, com salas persistentes e exclusão de projetos ativos da visualização.
+- Cadastro antecipado de personagens e associação dos personagens a cada projeto.
+- Cadastro das nove empresas e cenários de construção, porto e grãos, beneficiamento, agro e escritório.
+- Painel de contas com Codex X como única conta ativa por padrão e orientação para login isolado.
+- Filtro no servidor para mapa, feed, detalhes e histórico; os registros agregados antigos ficam bloqueados para não revelar projetos ocultos.
+
+
 ## [1.0.3] - 2026-10-16
 
 ### Corrigido
