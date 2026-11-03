@@ -50,11 +50,20 @@ export class DashboardPanel {
   }
   private async open(): Promise<void> {
     this.message.textContent = tr('Carregando…');
+    this.content.replaceChildren();
+    const controls = this.dialog.querySelectorAll<HTMLButtonElement>('.dash-tabs button, .dash-footer button');
+    controls.forEach(button => button.disabled = true);
     if (!this.dialog.open) this.dialog.showModal();
     try {
-      const [config, data] = await Promise.all([api<DashboardConfig>('/api/dashboard'), api<{ projects: Array<{ path: string; name: string }> }>('/api/dashboard/projects')]);
-      this.config = config; this.candidates = data.projects; this.dirty = false; this.message.textContent = ''; if (!config.projects.length) this.page = 'projects'; this.render();
+      const config = await api<DashboardConfig>('/api/dashboard');
+      this.config = config; this.dirty = false; this.message.textContent = ''; if (!config.projects.length) this.page = 'projects'; this.render();
+      // Discovering old sessions can take longer; it must not delay editing the saved team.
+      void api<{ projects: Array<{ path: string; name: string }> }>('/api/dashboard/projects').then(data => {
+        this.candidates = data.projects;
+        if (this.dialog.open && this.page === 'projects' && !this.dirty) this.render();
+      }).catch(() => {});
     } catch (err) { this.message.textContent = (err as Error).message; }
+    finally { controls.forEach(button => button.disabled = false); }
   }
   private async save(): Promise<void> {
     this.message.textContent = tr('Salvando…');
