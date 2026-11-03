@@ -12,6 +12,8 @@ do meio (0.**3**.0).
 
 ### Adicionado no fork
 
+- Visão geral e zoom mínimo incluem todo o cenário empresarial em telas menores, com os painéis abertos.
+
 - Nove temas empresariais em Configurações, com porto, silos, lavouras, fábricas, canteiros, edifícios e pátios no cenário externo.
 
 - Edição do caminho de projetos cadastrados, preservando nome, empresa e funcionários.
