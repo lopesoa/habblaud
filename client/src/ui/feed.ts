@@ -91,6 +91,19 @@ export class FeedPanel implements UiComponent {
   }
 
   render(): void {
+    if (this.ctx.store.snapshot?.meta.dashboard) {
+      const allowed = (f: FeedItem) => this.ctx.store.feedAllowed(f);
+      const removed = this.items.some(f => !allowed(f)) || this.pending.some(f => !allowed(f));
+      if (removed) {
+        this.items = this.items.filter(allowed); this.pending = this.pending.filter(allowed);
+        this.pendingCounts.clear();
+        for (const f of this.pending) {
+          const account = this.accountOf(f);
+          this.pendingCounts.set(account, (this.pendingCounts.get(account) ?? 0) + 1);
+        }
+        this.rows.sync(this.items.filter(f => this.visible(f)));
+      }
+    }
     for (const a of this.ctx.store.snapshot?.agents ?? []) {
       const m = this.meta.get(a.id);
       if (!m || m.seed !== a.seed || m.account !== a.account || partsKey(m.parts) !== partsKey(a.parts)) {

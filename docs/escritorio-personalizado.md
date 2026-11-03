@@ -10,9 +10,9 @@ O filtro é aplicado no servidor ao mapa, personagens, feed, avisos, detalhes e 
 
 O painel de gerenciamento permite ver os projetos detectados para escolher quais cadastrar; abra-o somente quando quiser gerenciar essa lista.
 
-## Personagens
+## Funcionários
 
-Crie nomes e aparências na aba Personagens e associe-os ao projeto na ordem desejada. A primeira sessão usa o primeiro personagem, a segunda usa o seguinte. Se houver mais sessões que personagens, o elenco se repete com sufixos numéricos. As atribuições são estáveis durante a presença das sessões. Sem elenco, usa-se um avatar neutro fixo identificado como **Agente sem personagem**. O mapa não cria agentes ou trabalho fictícios para preencher salas vazias.
+Crie nomes e aparências na aba Funcionários e associe-os ao projeto na ordem desejada. A primeira sessão usa o primeiro personagem, a segunda usa o seguinte. Se houver mais sessões que personagens, o elenco se repete com sufixos numéricos. As atribuições são estáveis durante a presença das sessões. Sem elenco, usa-se um avatar neutro fixo identificado como **Agente sem personagem**. O mapa não cria agentes ou trabalho fictícios para preencher salas vazias.
 
 ## Empresas e cenários
 

@@ -12,6 +12,10 @@ do meio (0.**3**.0).
 
 ### Adicionado no fork
 
+- Cadastro da equipe identificado como Funcionários, com botão Cadastrar funcionário.
+
+- Remoção imediata de eventos já exibidos ao ocultar um projeto ou conta.
+
 - Gestão local de projetos escolhidos, com salas persistentes e exclusão de projetos ativos da visualização.
 - Cadastro antecipado de personagens e associação dos personagens a cada projeto.
 - Cadastro das nove empresas e cenários de construção, porto e grãos, beneficiamento, agro e escritório.

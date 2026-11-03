@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { OfficeSnapshot } from '../../../shared/types';
+import type { FeedItem, OfficeSnapshot } from '../../../shared/types';
 import { mockOptionsFrom, OfficeStore, pageBuild, reconnectDelay, type EventSourceLike } from './store';
 
 /** EventSource falso: o teste dispara open/error e muda o readyState. */
@@ -187,6 +187,21 @@ describe('OfficeStore: reconexão', () => {
     vi.advanceTimersByTime(60_000);
     expect(sources).toHaveLength(1);
     expect(store.connection).toBe('connecting');
+  });
+
+  it('retira eventos antigos e rejeita novos eventos de projetos ocultos', () => {
+    store.connect(); last().open();
+    const room = { id: '/private', path: '/private', name: 'Private', slot: 0, seed: 1, createdAt: 1 };
+    const snapshot: OfficeSnapshot = { rev: 1, serverTime: 0, rooms: [room], agents: [], accounts: [], meta: { dashboard: true, demo: false, sources: [], startedAt: 1, version: 't' } };
+    const event: FeedItem = { id: 'f1', agentId: 'a', roomId: room.id, agentName: 'Ana', roomName: room.name, activity: { id: 'x', at: 0, kind: 'run', icon: '·', text: 'private activity' } };
+    last().fire('snapshot', snapshot);
+    last().fire('feed', [event]);
+    expect(store.feed).toHaveLength(1);
+    last().fire('snapshot', { ...snapshot, rev: 2, rooms: [] });
+    expect(store.feed).toEqual([]);
+    last().fire('feed', [{ ...event, id: 'f2' }]);
+    expect(store.feed).toEqual([]);
+    expect(store.feedAllowed(event)).toBe(false);
   });
 
   it('aplica snapshot, feed e avisos; JSON inválido é ignorado', () => {

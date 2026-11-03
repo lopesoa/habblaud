@@ -37,7 +37,7 @@ export class DashboardPanel {
     });
     this.dialog.addEventListener('cancel', ev => { if (this.dirty && !confirm(tr('Descartar as alterações que ainda não foram salvas?'))) ev.preventDefault(); });
     const tabs = h('nav', { class: 'dash-tabs', attrs: { 'aria-label': tr('Seções do escritório') } });
-    for (const [id, label] of [['projects', tr('Projetos')], ['characters', tr('Personagens')], ['companies', tr('Empresas e temas')], ['accounts', tr('Contas')]]) {
+    for (const [id, label] of [['projects', tr('Projetos')], ['characters', tr('Funcionários')], ['companies', tr('Empresas e temas')], ['accounts', tr('Contas')]]) {
       const tab = button(label, () => { this.page = id; this.render(); });
       tab.setAttribute('data-page', id); tabs.append(tab);
     }
@@ -99,18 +99,18 @@ export class DashboardPanel {
     this.content.append(h('section', { class: 'dash-card' }, h('div', { class: 'dash-row' }, h('label', { class: 'dash-visible' }, visible, h('strong', { text: tr('Mostrar no escritório') })),
       button(tr('Remover cadastro'), () => { if (confirm(tr('Remover este cadastro? Os arquivos e as conversas do projeto não serão apagados.'))) { this.config.projects = this.config.projects.filter(x => x !== p); this.dirty = true; this.render(); } })),
       h('code', { text: p.path }), h('div', { class: 'dash-grid' }, field(tr('Nome da sala'), name), field(tr('Empresa / cenário'), company)),
-      h('p', { text: tr('Personagens desta sala (ordem de chegada das sessões):') }), cast,
-      !this.config.characters.length ? h('p', { class: 'dash-hint', text: tr('Cadastre personagens na aba Personagens. Sem cadastro, a sessão usa um avatar neutro fixo.') }) : h('span')));
+      h('p', { text: tr('Funcionários desta sala (ordem de chegada das sessões):') }), cast,
+      !this.config.characters.length ? h('p', { class: 'dash-hint', text: tr('Cadastre funcionários na aba Funcionários. Sem cadastro, a sessão usa um avatar neutro fixo.') }) : h('span')));
   }
   private characters(): void {
-    this.content.append(h('p', { class: 'dash-hint', text: tr('Crie sua equipe antes de abrir as sessões. Nome e aparência permanecem iguais nos próximos acessos. Depois associe os personagens aos projetos.') }),
-      button(tr('Criar personagem'), () => {
-        const c: Character = { id: crypto.randomUUID(), name: tr('Novo personagem'), seed: 1, look: 'm', parts: {} };
+    this.content.append(h('p', { class: 'dash-hint', text: tr('Crie sua equipe antes de abrir as sessões. Nome e aparência permanecem iguais nos próximos acessos. Depois associe os funcionários aos projetos.') }),
+      button(tr('Cadastrar funcionário'), () => {
+        const c: Character = { id: crypto.randomUUID(), name: tr('Novo funcionário'), seed: 1, look: 'm', parts: {} };
         this.config.characters.push(c); this.dirty = true; this.editCharacter(c);
       }));
     for (const c of this.config.characters) this.content.append(h('div', { class: 'dash-card dash-row' }, createAvatar({ ...c, kind: 'main' }, 'md'), h('strong', { text: c.name }),
       button(tr('Editar aparência'), () => this.editCharacter(c)), button(tr('Remover'), () => {
-        if (!confirm(tr('Remover este personagem do cadastro e dos projetos?'))) return;
+        if (!confirm(tr('Remover este funcionário do cadastro e dos projetos?'))) return;
         this.config.characters = this.config.characters.filter(x => x.id !== c.id);
         for (const p of this.config.projects) p.characters = p.characters.filter(id => id !== c.id);
         this.dirty = true; this.render();
@@ -125,7 +125,7 @@ export class DashboardPanel {
     const fields = new AppearanceFields(appearance => { c.parts = changedParts(appearanceFromSeed(c.seed, { look: c.look }), appearance); this.dirty = true; });
     fields.set(appearanceFromSeed(c.seed, { look: c.look, parts: c.parts }));
     name.addEventListener('input', () => c.name = name.value);
-    this.content.append(h('div', { class: 'dash-grid' }, field(tr('Nome do personagem'), name), field(tr('Aparência base'), look)), fields.preview, fields.groups,
+    this.content.append(h('div', { class: 'dash-grid' }, field(tr('Nome do funcionário'), name), field(tr('Aparência base'), look)), fields.preview, fields.groups,
       button(tr('Voltar para a equipe'), () => this.render()));
   }
   private companies(): void {

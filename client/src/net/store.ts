@@ -383,8 +383,16 @@ export class OfficeStore {
     this.checkBuild(snap.meta.build);
   }
 
+  /** Apply the private office selection to cached events as well as new arrivals. */
+  feedAllowed(item: FeedItem): boolean {
+    const snap = this.snapshot;
+    return !snap?.meta.dashboard || (snap.rooms.some(r => r.id === item.roomId)
+      && (!item.account || snap.accounts.some(a => a.id === item.account)));
+  }
+
   private setSnapshot(snap: OfficeSnapshot): void {
     this.snapshot = snap;
+    if (snap.meta.dashboard) this.feed = this.feed.filter(f => this.feedAllowed(f));
     this.agentIndex = new Map(snap.agents.map((a) => [a.id, a]));
     this.roomIndex = new Map(snap.rooms.map((r) => [r.id, r]));
     this.emit('snapshot', snap);
@@ -406,7 +414,7 @@ export class OfficeStore {
   private applyFeed(items: FeedItem[]): void {
     if (!items.length) return;
     const known = new Set(this.feed.map((f) => f.id));
-    const fresh = items.filter((f) => !known.has(f.id));
+    const fresh = items.filter((f) => !known.has(f.id) && this.feedAllowed(f));
     if (!fresh.length) return;
     this.feed = [...this.feed, ...fresh].slice(-FEED_LIMIT);
     this.emit('feed', fresh);
