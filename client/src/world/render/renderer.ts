@@ -1,6 +1,7 @@
 // Desenho do mundo por frame: camada externa -> pisos -> paredes/itens de parede -> entidades
 // ordenadas por profundidade -> luz/escuridão -> ícones. A passada em espaço de tela (texto
 // nítido) fica em overlay.ts.
+import { enterpriseTheme, enterpriseGround, paintEnterpriseExterior } from './enterprise';
 import { drawIndustryRoom } from './industry';
 import { TILE, type ArtModule, type CharacterFrameRequest, type IconName, type ScreenMode, type Sprite } from '../../art/api';
 import type { SeasonalTheme, WorldOptions } from '../api';
@@ -117,6 +118,7 @@ export class Renderer {
   private clearColor = '#7fae62';
   private grass: CanvasPattern | null = null;
   private theme: SeasonalTheme = 'none';
+  private companyTheme = '';
 
   constructor(
     readonly canvas: HTMLCanvasElement,
@@ -137,9 +139,10 @@ export class Renderer {
   // =================================================================== sincronização com a simulação
 
   /** Mantém caches e visuais coerentes com o prédio atual. */
-  sync(theme: SeasonalTheme = 'none'): void {
+  sync(theme: SeasonalTheme = 'none', companyTheme = ''): void {
     const sim = this.sim;
-    const themeChanged = theme !== this.theme;
+    const themeChanged = theme !== this.theme || companyTheme !== this.companyTheme;
+    this.companyTheme = companyTheme;
     this.theme = theme;
     const assetsChanged = this.builtAssetsVersion !== this.assetsVersion || themeChanged;
     if (this.baseCols !== sim.building.cols || assetsChanged) this.buildBase();
@@ -177,6 +180,8 @@ export class Renderer {
     const cols = this.sim.building.cols;
     this.baseCols = cols;
     this.exterior = layoutExterior(cols);
+    const company = enterpriseTheme(this.companyTheme);
+    if (company) this.exterior.props = this.exterior.props.filter(p => ['lamp', 'bench'].includes(p.kind));
     const b = this.exterior.bounds;
     this.baseX = b.x * TILE;
     this.baseY = b.y * TILE;
@@ -187,6 +192,7 @@ export class Renderer {
     ctx.imageSmoothingEnabled = false;
     ctx.translate(-this.baseX, -this.baseY);
     paintShell(this.art, ctx, this.exterior.floors, []);
+    if (company) paintEnterpriseExterior(ctx, this.exterior, company, cols);
     // faixas da rua
     const ly = this.exterior.streetY + Math.round(this.exterior.streetH / 2) - 1;
     ctx.fillStyle = 'rgba(255,236,170,0.75)';
@@ -248,6 +254,7 @@ export class Renderer {
       this.clearColor = '#6f9a5a';
     }
     this.finishBase(ctx, cols);
+    if (company) { this.grass = null; this.clearColor = enterpriseGround(company); }
     this.base = c;
   }
 

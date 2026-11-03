@@ -109,7 +109,9 @@ export function createWorld(canvas: HTMLCanvasElement, store: OfficeStore, o: Cr
   };
 
   const overviewTarget = () => {
-    const f = overviewFrame(buildingRect(), camera.viewW, camera.viewH, camera.insets);
+    const building = buildingRect();
+    const frame = options.companyTheme ? { x: building.x - 150, y: building.y - 190, w: building.w + 300, h: building.h + 410 } : building;
+    const f = overviewFrame(frame, camera.viewW, camera.viewH, camera.insets);
     const fit = Math.max(camera.minZoom, f.zoom);
     const snapped = camera.snapZoom(fit, 'down');
     const zoom = snapped >= fit * 0.82 ? snapped : fit;
@@ -291,7 +293,7 @@ export function createWorld(canvas: HTMLCanvasElement, store: OfficeStore, o: Cr
         if (!playback) for (const e of events) for (const cb of socialCbs) cb(e);
         events.length = 0;
       }
-      renderer.sync(seasonalThemeFor(options.theme, new Date()));
+      renderer.sync(options.companyTheme ? 'none' : seasonalThemeFor(options.theme, new Date()), options.companyTheme);
       if (sim.building.cols !== lastCols) {
         lastCols = sim.building.cols;
         updateBounds();
@@ -413,7 +415,9 @@ export function createWorld(canvas: HTMLCanvasElement, store: OfficeStore, o: Cr
     },
     getOptions: () => ({ ...options }),
     setOptions: (o) => {
+      const companyChanged = 'companyTheme' in o && o.companyTheme !== options.companyTheme;
       options = { ...options, ...o };
+      if (companyChanged && framed) { userMoved = false; overview(true); }
       if (o.followSelected !== undefined) camera.follow = o.followSelected && selection?.type === 'agent' ? selection.id : null;
     },
     setViewInsets: (ins) => {

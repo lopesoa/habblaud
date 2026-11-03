@@ -12,6 +12,10 @@ do meio (0.**3**.0).
 
 ### Adicionado no fork
 
+- Nove temas empresariais em Configurações, com porto, silos, lavouras, fábricas, canteiros, edifícios e pátios no cenário externo.
+
+- Edição do caminho de projetos cadastrados, preservando nome, empresa e funcionários.
+
 - Cadastro da equipe identificado como Funcionários, com botão Cadastrar funcionário.
 
 - Remoção imediata de eventos já exibidos ao ocultar um projeto ou conta.

@@ -91,7 +91,7 @@ export class FeedPanel implements UiComponent {
   }
 
   render(): void {
-    if (this.ctx.store.snapshot?.meta.dashboard) {
+    if (this.ctx.store.snapshot?.meta?.dashboard) {
       const allowed = (f: FeedItem) => this.ctx.store.feedAllowed(f);
       const removed = this.items.some(f => !allowed(f)) || this.pending.some(f => !allowed(f));
       if (removed) {

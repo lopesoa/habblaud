@@ -123,3 +123,16 @@ describe('migração do nome antigo (CodeTown)', () => {
     expect(Object.fromEntries(full.data)).toEqual({ 'codetown:prefs': '{}' });
   });
 });
+
+describe('temas empresariais locais', () => {
+  it('persiste empresa válida e permite voltar ao cenário original', () => {
+    const storage = memoryStorage();
+    const prefs = sanitizePrefs({ companyTheme: 'agro' });
+    savePrefs(storage, prefs);
+    expect(worldOptionsFrom(loadPrefs(storage)).companyTheme).toBe('agro');
+    const cleared = sanitizePrefs({ ...prefs, companyTheme: undefined });
+    expect(worldOptionsFrom(cleared)).toHaveProperty('companyTheme', undefined);
+    expect(sanitizePrefs({ companyTheme: 'unknown-company' }).companyTheme).toBeUndefined();
+    expect(sanitizePrefs({ companyTheme: 'agro', theme: 'halloween' }).theme).toBe('halloween');
+  });
+});

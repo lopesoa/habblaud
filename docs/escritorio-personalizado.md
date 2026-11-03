@@ -6,6 +6,8 @@ Este fork adiciona **Meu escritório** à barra superior. As escolhas ficam no a
 
 Cadastre um nome e o caminho completo da pasta, ou importe os projetos encontrados no computador. Novos cadastros começam **ocultos**. Marque **Mostrar no escritório** e salve para manter a sala no mapa, mesmo sem nenhuma sessão aberta. Desmarque para ocultar um projeto inclusive quando ele estiver executando.
 
+Para corrigir a associação de uma sala, edite **Caminho da pasta** no cartão do projeto e clique em **Salvar escritório**. Isso preserva o nome, a empresa e os funcionários, sem mover arquivos nem alterar a pasta do chat no Codex. Caminhos duplicados ou inválidos são recusados.
+
 O filtro é aplicado no servidor ao mapa, personagens, feed, avisos, detalhes e histórico de sessões. Mudar a seleção fecha os streams de terminal já abertos. **Meu dia, timelapse e entregas agregadas antigas ficam indisponíveis nesta versão**, pois esses registros podem conter projetos agora ocultos. A seleção não apaga nem encerra conversas. Administradores da máquina ainda podem acessar os arquivos pelos aplicativos de origem.
 
 O painel de gerenciamento permite ver os projetos detectados para escolher quais cadastrar; abra-o somente quando quiser gerenciar essa lista.
@@ -19,6 +21,8 @@ Crie nomes e aparências na aba Funcionários e associe-os ao projeto na ordem d
 Os registros de empresas possuem nome, ramo e cor editáveis. Cada sala recebe a identidade da empresa associada. Os cenários têm cores próprias de piso e paredes e decoração pixel art de construção, navio e cais, linha de embalagem, soja/milho/algodão, armazém com silos, arquitetura e escritório do CSC.
 
 Os nomes iniciais correspondem às empresas do grupo; ramo e cor podem ser ajustados. Duas empresas podem usar o mesmo cenário.
+
+Em **Configurações → Aparência → Tema empresarial**, escolha uma das nove empresas para personalizar todo o cenário externo. A escolha fica neste navegador e continua após recarregar. A identidade de cada sala continua sendo definida no projeto. Para voltar aos temas sazonais, escolha **Visual original**.
 
 ## Contas
 

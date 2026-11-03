@@ -98,6 +98,8 @@ export class DashboardPanel {
   private projectCard(p: Project): void {
     const visible = input('', 'checkbox'); visible.checked = p.visible; visible.addEventListener('change', () => p.visible = visible.checked);
     const name = input(p.name); name.addEventListener('input', () => p.name = name.value);
+    const path = input(p.path); path.placeholder = tr('Caminho completo da pasta');
+    path.addEventListener('input', () => p.path = path.value.trim());
     const company = select(this.config.companies.map(c => [c.id, c.name]), p.company, id => p.company = id);
     const cast = h('div', { class: 'dash-roster' });
     for (const c of this.config.characters) {
@@ -107,7 +109,9 @@ export class DashboardPanel {
     }
     this.content.append(h('section', { class: 'dash-card' }, h('div', { class: 'dash-row' }, h('label', { class: 'dash-visible' }, visible, h('strong', { text: tr('Mostrar no escritório') })),
       button(tr('Remover cadastro'), () => { if (confirm(tr('Remover este cadastro? Os arquivos e as conversas do projeto não serão apagados.'))) { this.config.projects = this.config.projects.filter(x => x !== p); this.dirty = true; this.render(); } })),
-      h('code', { text: p.path }), h('div', { class: 'dash-grid' }, field(tr('Nome da sala'), name), field(tr('Empresa / cenário'), company)),
+      field(tr('Caminho da pasta'), path),
+      h('p', { class: 'dash-hint', text: tr('Altera apenas a associação no Habblaud; não move arquivos nem muda a pasta do chat no Codex.') }),
+      h('div', { class: 'dash-grid' }, field(tr('Nome da sala'), name), field(tr('Empresa / cenário'), company)),
       h('p', { text: tr('Funcionários desta sala (ordem de chegada das sessões):') }), cast,
       !this.config.characters.length ? h('p', { class: 'dash-hint', text: tr('Cadastre funcionários na aba Funcionários. Sem cadastro, a sessão usa um avatar neutro fixo.') }) : h('span')));
   }

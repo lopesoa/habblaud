@@ -3,6 +3,10 @@
 // Chave ausente = o texto fica em PT. `npm run i18n:check` lista os textos sem tradução e as chaves que sobraram.
 export const ES: Readonly<Record<string, string>> = {
   // Custom office controls
+  "Tema empresarial": "Tema empresarial",
+  "Visual original": "Aspecto original",
+  "Muda o cenário externo do seu escritório. As salas mantêm a empresa escolhida em Meu escritório. Para Natal e Halloween, selecione Visual original.": "Cambia el escenario exterior de su oficina. Las salas conservan la empresa elegida en Mi oficina. Para Navidad y Halloween, seleccione Aspecto original.",
+  "Altera apenas a associação no Habblaud; não move arquivos nem muda a pasta do chat no Codex.": "Solo cambia la asociación en Habblaud; no mueve archivos ni cambia la carpeta del chat en Codex.",
   "Cadastrar funcionário": "Registrar empleado",
   "Escritório / holding": "Oficina / holding",
   "Construtora": "Constructora",

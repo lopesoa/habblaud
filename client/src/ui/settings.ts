@@ -1,5 +1,6 @@
 // Configurações (popover): opções do escritório, avisos, modo demonstração e Sobre (versão). O Habblaud World tem a
 // janela própria (ui/world/world-dialog.ts); daqui só sai a dica do tema em Aparência, que também vai para o prédio.
+import { ENTERPRISE_THEMES } from '../world/render/enterprise';
 import { access, remoteLogout } from '../net/access';
 import type { UiComponent, UiContext } from './context';
 import { h, iconButton, setAttr, setHidden, setText } from './dom';
@@ -35,7 +36,7 @@ function pickLanguage(v: LanguageChoice): void {
   location.reload();
 }
 
-type BoolPref = { [K in keyof UiPrefs]: UiPrefs[K] extends boolean ? K : never }[keyof UiPrefs];
+type BoolPref = { [K in keyof UiPrefs]-?: UiPrefs[K] extends boolean ? K : never }[keyof UiPrefs];
 
 interface SwitchRefs {
   btn: HTMLButtonElement;
@@ -89,6 +90,7 @@ export class SettingsPopover implements UiComponent {
   private liveliness: ReturnType<typeof segmented<UiPrefs['liveliness']>>;
   private daylight: ReturnType<typeof segmented<UiPrefs['daylight']>>;
   private theme: ReturnType<typeof segmented<UiPrefs['theme']>>;
+  private companyTheme: HTMLSelectElement;
   private language: ReturnType<typeof segmented<LanguageChoice>>;
   private soundGroup: SoundSettingsGroup;
   private demoGroup: HTMLElement;
@@ -151,6 +153,12 @@ export class SettingsPopover implements UiComponent {
       },
     );
     this.theme.row.append(h('span', { class: 'ui-set__hint', text: tr('Automático: Halloween em outubro e Natal de 1º de novembro a 26 de dezembro; no resto do ano, o visual original. Nenhum: sempre o original.') }));
+    this.companyTheme = h('select', { class: 'dash-input', attrs: { 'aria-label': tr('Tema empresarial') } },
+      h('option', { attrs: { value: '' }, text: tr('Visual original') }),
+      ...ENTERPRISE_THEMES.map(company => h('option', { attrs: { value: company.id }, text: company.name })));
+    this.companyTheme.addEventListener('change', () => ctx.updatePrefs({ companyTheme: this.companyTheme.value || undefined }));
+    const companyRow = h('label', { class: 'ui-set ui-set--stack' }, h('span', { class: 'ui-set__label', text: tr('Tema empresarial') }), this.companyTheme,
+      h('span', { class: 'ui-set__hint', text: tr('Muda o cenário externo do seu escritório. As salas mantêm a empresa escolhida em Meu escritório. Para Natal e Halloween, selecione Visual original.') }));
     this.soundGroup = new SoundSettingsGroup(ctx, sound);
 
     // Nomes dos idiomas sempre na própria língua, para quem não entende o idioma atual achar o seu.
@@ -196,7 +204,7 @@ export class SettingsPopover implements UiComponent {
       'div',
       { class: 'ui-popover ui-settings', role: 'dialog', tabIndex: -1, attrs: { 'aria-label': tr('Configurações'), id: 'ui-settings', popover: 'auto' } },
       h('div', { class: 'ui-popover__head' }, h('h2', { text: tr('Configurações') }), close),
-      h('div', { class: 'ui-set-group' }, h('h3', { text: tr('Aparência') }), this.theme.row),
+      h('div', { class: 'ui-set-group' }, h('h3', { text: tr('Aparência') }), companyRow, this.theme.row),
       h(
         'div',
         { class: 'ui-set-group' },
@@ -285,6 +293,7 @@ export class SettingsPopover implements UiComponent {
     this.liveliness.set(p.liveliness);
     this.daylight.set(p.daylight);
     this.theme.set(p.theme);
+    this.companyTheme.value = p.companyTheme || '';
     this.language.set(savedLanguage());
     this.soundGroup.render();
     setHidden(this.demoGroup, this.ctx.store.mock || access().remote);

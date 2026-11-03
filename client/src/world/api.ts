@@ -19,6 +19,8 @@ export interface WorldOptions {
   daylight?: DaylightMode;
   /** Tema visual: automático (segue o calendário; ver seasonalThemeFor), nenhum, Natal ou Halloween. */
   theme?: OfficeTheme;
+  /** Local enterprise scenery; independent of Habblaud World. */
+  companyTheme?: string;
 }
 
 /** Tema que o renderer desenha: o escritório original ('none') ou um dos sazonais. */

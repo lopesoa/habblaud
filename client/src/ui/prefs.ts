@@ -2,6 +2,7 @@
 // Puro: o armazenamento é injetado (testável em node).
 import { DEFAULT_SOUND_SETTINGS, sanitizeSoundSettings, type SoundSettings } from '../audio/scheduler';
 import type { DaylightMode, WorldOptions } from '../world/api';
+import { ENTERPRISE_THEMES } from '../world/render/enterprise';
 import { DEFAULT_WORLD_OPTIONS } from '../world/api';
 
 export const PREFS_KEY = 'habblaud:prefs';
@@ -13,6 +14,7 @@ export interface UiPrefs {
   /** Ciclo dia/noite: automático (hora local), sempre dia ou sempre noite. */
   daylight: DaylightMode;
   theme: NonNullable<WorldOptions['theme']>;
+  companyTheme?: string;
   /** Sons sintetizados (interruptor geral; desligado por padrão). */
   sound: boolean;
   /** Volume mestre e categorias dos sons. */
@@ -59,6 +61,7 @@ export function sanitizePrefs(raw: unknown): UiPrefs {
     // preferências antigas: o interruptor "dia e noite" desligado vira "sempre dia"
     daylight: oneOf(o.daylight, ['auto', 'day', 'night'] as const, o.dayNight === false ? 'day' : d.daylight),
     theme: oneOf(o.theme, ['auto', 'none', 'christmas', 'halloween'] as const, d.theme),
+    ...(typeof o.companyTheme === 'string' && ENTERPRISE_THEMES.some(c => c.id === o.companyTheme) ? { companyTheme: o.companyTheme } : {}),
     sound: bool(o.sound, d.sound),
     sounds: sanitizeSoundSettings(o.sounds),
     browserNotifications: bool(o.browserNotifications, d.browserNotifications),
@@ -90,7 +93,7 @@ export function savePrefs(storage: StorageLike | null, prefs: UiPrefs): void {
 
 /** Parte das preferências que o mundo (canvas) consome. */
 export function worldOptionsFrom(p: UiPrefs): Partial<WorldOptions> {
-  return { showNames: p.showNames, bubbles: p.bubbles, liveliness: p.liveliness, dayNight: p.daylight !== 'day', daylight: p.daylight, theme: p.theme };
+  return { showNames: p.showNames, bubbles: p.bubbles, liveliness: p.liveliness, dayNight: p.daylight !== 'day', daylight: p.daylight, theme: p.theme, companyTheme: p.companyTheme };
 }
 
 /** localStorage com proteção contra navegadores que lançam exceção ao acessá-lo. */
